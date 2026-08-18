@@ -1,40 +1,85 @@
-import os, json
+import os
+import json
+from pathlib import Path
 
-os.makedirs("data/evaluation", exist_ok=True)
-os.makedirs("data/corpus", exist_ok=True)
-
-def derive_silver_label(criteria: dict) -> str:
-    """Deterministically maps boolean facts to a weak-supervision classification label."""
-    if not criteria.get("metric_matched", False): return "no_relevant_explanation_found"
-    if criteria.get("driver_identified") and criteria.get("quantified_impact"): return "explicitly_explained"
-    if criteria.get("driver_identified") and not criteria.get("quantified_impact"): return "partially_explained"
-    return "no_relevant_explanation_found"
-
-cases = [
-    {
-        "id": "tsla_2025_inv",
-        "ticker": "TSLA",
-        "trigger": {
-            "trigger_type": "INVENTORY_SALES_DIVERGENCE",
-            "description": "Inventory grew 34.1% YoY vs Revenue 8.3% YoY.",
-            "sub_queries": ["raw material cost", "supply chain"]
+def generate_fixtures():
+    output_dir = "data/evaluation"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = Path(output_dir) / "investigation_cases.jsonl"
+    
+    print(f"Generating frozen evaluation fixtures at {output_file}...")
+    
+    # Insert your 7 handwritten cases here
+    cases = [
+        {
+            "ticker": "TSLA",
+            "fiscal_year": 2023,
+            "sector": "Manufacturing",
+            "trigger_description": "Inventory grew 123.0% YoY vs Revenue 70.7% YoY.",
+            "expected_citations": ["TSLA_MD&A_30", "TSLA_MD&A_33", "TSLA_MD&A_31", "TSLA_MD&A_32"],
+            "expected_status": "explicitly_explained"
         },
-        "gold_evidence_chunks": ["TSLA_2025_ITEM7_0042"],
-        "silver_label_criteria": {
-            "metric_matched": True, "driver_identified": True, "quantified_impact": True
+
+        {
+        "ticker": "AAPL",
+        "fiscal_year": 2025,
+        "sector": "Manufacturing",
+        "trigger_description": "Inventory grew 15.1% YoY vs Revenue -2.8% YoY.",
+        "expected_citations": ["AAPL_MD&A_4", "AAPL_MD&A_6", "AAPL_MD&A_8"],
+        "expected_status": "partially_explained"
+        },
+
+        {
+        "ticker": "AAPL",
+        "fiscal_year": 2025,
+        "sector": "Manufacturing",
+        "trigger_description": "AR grew 13.2% YoY vs Revenue -2.8% YoY.",
+        "expected_citations": ["AAPL_MD&A_4", "AAPL_MD&A_6", "AAPL_MD&A_8"],
+        "expected_status": "partially_explained"
+        },
+
+        {
+        "ticker": "AAPL",
+        "fiscal_year": 2024,
+        "sector": "Manufacturing",
+        "trigger_description": "Inventory grew 28.0% YoY vs Revenue 7.8% YoY.",
+        "expected_citations": ["AAPL_MD&A_10", "AAPL_MD&A_4", "AAPL_MD&A_5"],
+        "expected_status": "partially_explained"
+        },
+
+        {
+        "ticker": "NVDA",
+        "fiscal_year": 2025,
+        "sector": "Manufacturing",
+        "trigger_description": "AR grew 161.3% YoY vs Revenue 0.2% YoY.",
+        "expected_citations": ["NVDA_MD&A_12", "NVDA_MD&A_13"],
+        "expected_status": "partially_explained"
+        },
+
+        {
+        "ticker": "NVDA",
+        "fiscal_year": 2024,
+        "sector": "Manufacturing",
+        "trigger_description": "Inventory grew 98.0% YoY vs Revenue 61.4% YoY.",
+        "expected_citations": ["NVDA_MD&A_29, NVDA_MD&A_12, NVDA_MD&A_17"],
+        "expected_status": "explicitly_explained"
+        },
+
+        {
+        "ticker": "NVDA",
+        "fiscal_year": 2023,
+        "sector": "Manufacturing",
+        "trigger_description": "AR grew 91.4% YoY vs Revenue 52.7% YoY.",
+        "expected_citations": ["NVDA_MD&A_33, NVDA_MD&A_7"],
+        "expected_status": "partially_explained"
         }
-    }
-]
+    ]
+    
+    with open(output_file, "w", encoding="utf-8") as f:
+        for case in cases:
+            f.write(json.dumps(case) + "\n")
+            
+    print(f"Successfully froze {len(cases)} evaluation test cases into {output_file}!")
 
-for c in cases:
-    c["target_silver_label"] = derive_silver_label(c["silver_label_criteria"])
-
-with open("data/evaluation/investigation_cases.jsonl", "w") as f:
-    for c in cases: f.write(json.dumps(c) + "\n")
-
-chunks = [
-    {"chunk_id": "TSLA_2025_ITEM7_0042", "ticker": "TSLA", "section": "MD&A", "content": "Inventories increased by $2.1 billion, primarily due to raw material cost inflation."}
-]
-with open("data/corpus/tsla_chunks.json", "w") as f: json.dump(chunks, f)
-
-print("Frozen fixtures generated with Deterministic Silver Labels.")
+if __name__ == "__main__":
+    generate_fixtures()

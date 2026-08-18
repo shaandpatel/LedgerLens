@@ -51,42 +51,73 @@ class SECHTMLParser:
         raise ValueError(f"No 10-K found for {ticker}")
     
     def fetch_10k_text_by_year(self, ticker: str, cik: str, target_year: int) -> str:
-        """Fetches the 10-K HTML for a specific fiscal year, using local cache if available."""
-        cache_path = os.path.join(self.cache_dir, f"{ticker}_{target_year}_10k.html")
+        """Fetch the 10-K for the specified fiscal year."""
         
+        cache_path = os.path.join(
+            self.cache_dir,
+            f"{ticker}_{target_year}_10k.html"
+        )
+
         if os.path.exists(cache_path):
-            print(f"Loading {ticker} {target_year} 10-K HTML from local cache...")
+            print(f"Loading {ticker} {target_year} 10-K from cache...")
             with open(cache_path, "r", encoding="utf-8") as f:
                 return f.read()
 
-        print(f"Downloading {ticker} {target_year} 10-K HTML from SEC...")
-        submissions_url = f"https://data.sec.gov/submissions/CIK{cik.zfill(10)}.json"
+        submissions_url = (
+            f"https://data.sec.gov/submissions/CIK{cik.zfill(10)}.json"
+        )
+
         resp = requests.get(submissions_url, headers=self.headers)
         resp.raise_for_status()
-        
-        filings = resp.json().get("filings", {}).get("recent", {})
-        
-        for idx, form in enumerate(filings.get("form", [])):
-            if form in ["10-K", "10-K/A"]:
-                report_date = filings["reportDate"][idx]
-                report_year = int(report_date.split("-")[0])
-                
-                # Match the fiscal year (SEC 10-Ks for year Y are usually filed early in year Y+1)
-                if report_year == target_year or report_year == target_year + 1:
-                    accession_no = filings["accessionNumber"][idx].replace("-", "")
-                    document_name = filings["primaryDocument"][idx]
-                    
-                    html_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession_no}/{document_name}"
-                    doc_resp = requests.get(html_url, headers=self.headers)
-                    doc_resp.raise_for_status()
-                    
-                    html_text = doc_resp.text
-                    with open(cache_path, "w", encoding="utf-8") as f:
-                        f.write(html_text)
-                        
-                    return html_text
-                    
-        raise ValueError(f"No 10-K found for {ticker} matching year {target_year}")
+
+        filings = resp.json()["filings"]["recent"]
+
+        candidates = []
+
+        for idx, form in enumerate(filings["form"]):
+
+            # Prefer original 10-K, not amendments
+            if form != "10-K":
+                continue
+
+            report_date = filings["reportDate"][idx]
+
+            if not report_date:
+                continue
+
+            report_year = int(report_date[:4])
+
+            if report_year == target_year:
+                candidates.append(idx)
+
+        if not candidates:
+            raise ValueError(
+                f"No 10-K found for {ticker} fiscal year {target_year}"
+            )
+
+        # Usually there should be one
+        idx = candidates[0]
+
+        accession_no = filings["accessionNumber"][idx].replace("-", "")
+        document_name = filings["primaryDocument"][idx]
+
+        html_url = (
+            f"https://www.sec.gov/Archives/edgar/data/"
+            f"{int(cik)}/{accession_no}/{document_name}"
+        )
+
+        print(f"Downloading {ticker} {target_year} 10-K...")
+        print(html_url)
+
+        doc_resp = requests.get(html_url, headers=self.headers)
+        doc_resp.raise_for_status()
+
+        html_text = doc_resp.text
+
+        with open(cache_path, "w", encoding="utf-8") as f:
+            f.write(html_text)
+
+        return html_text
 
     def extract_mda_section(self, html_content: str) -> str:
         soup = BeautifulSoup(html_content, "lxml")

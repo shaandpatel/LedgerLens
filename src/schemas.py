@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field, field_validator
 class AnomalyTrigger(BaseModel):
     ticker: str
     fiscal_year: int
-    trigger_type: str
-    severity: Literal["NORMAL", "MEDIUM", "HIGH", "CRITICAL"]
-    divergence_value: float
+    trigger_type: str = "ANOMALY"
+    severity: str = "MEDIUM"
+    divergence_value: float = 0.0
     description: str
-    sub_queries: List[str] = Field(..., description="Targeted queries for evidence clustering")
+    sub_queries: List[str] = []
 
 class DocumentChunk(BaseModel):
     chunk_id: str
@@ -41,7 +41,7 @@ class InvestigationResult(BaseModel):
         "unable_to_determine"
     ]
     management_explanation_summary: str
-    confidence_score: float = Field(..., ge=0.0, le=1.0)
+    confidence_score: float = Field(..., ge=0.0, le=100.0)
     cited_chunk_ids: List[str]
 
     @field_validator("confidence_score")
