@@ -29,7 +29,7 @@ class SectorAwareAnalyticsEngine:
                 )
 
         # 2. SaaS / Software Specific Signals
-        elif sector in ["Software", "SaaS"]:
+        elif sector.lower() == "saas" or sector.lower() == "software & services":
             def_rev_growth = self.calculate_yoy_growth(cur.get("deferred_revenue", 0), prev.get("deferred_revenue", 0))
             if (rev_growth - def_rev_growth) > self.threshold:
                 triggers.append(

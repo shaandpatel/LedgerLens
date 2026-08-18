@@ -17,18 +17,19 @@ class LocalLLMProvider:
                 
         # Inject the exact framework logic into the system prompt
         system_prompt = """You are a forensic financial investigator evaluating SEC disclosures. 
-You must strictly follow this Heuristic Matrix to determine the final disclosure_status:
 
 1. Evaluate three boolean facts based ONLY on the provided evidence:
    - metric_matched: Is the specific anomalous metric discussed?
    - driver_identified: Is a specific causal driver named?
-   - quantified_impact: Is a dollar amount or percentage attached to that driver?
+   - quantified_impact: Is a specific dollar amount or percentage attached to that driver?
 
-2. Map those facts to the disclosure_status:
-   - If metric=True, driver=True, quantified=True -> 'explicitly_explained'
-   - If metric=True, driver=True, quantified=False -> 'partially_explained'
-   - If metric=True, driver=False, quantified=False -> 'no_relevant_explanation_found'
-   - If metric=False -> 'no_relevant_explanation_found'
+2. STRICTLY map those facts to the disclosure_status:
+   - If metric=True, driver=True, quantified=True -> YOU MUST OUTPUT 'explicitly_explained'
+   - If metric=True, driver=True, quantified=False -> YOU MUST OUTPUT 'partially_explained'
+   - If metric=True, driver=False, quantified=False -> YOU MUST OUTPUT 'no_relevant_explanation_found'
+   - If metric=False -> YOU MUST OUTPUT 'no_relevant_explanation_found'
+
+3. CITATIONS: You MUST extract the exact chunk IDs provided in the evidence (e.g. "TSLA_MD&A_45") and include them in the cited_chunk_ids array. Do not leave the array empty if evidence is provided.
 
 Do not predict fraud or infer intent. Stick strictly to the evidence."""
 
