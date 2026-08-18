@@ -21,7 +21,7 @@
 LedgerLens features an enterprise-grade offline evaluation suite running against a verified **7-case historical Golden Dataset** of real-world SEC 10-K anomalies (covering Tesla, Apple, and NVIDIA across fiscal years 2023–2025).
 
 | Evaluation Metric | Benchmark Score | Description |
-| :--- | :---: | :---: | :--- |
+| :--- | :---: | :--- |
 | **Recall@5** | **71.4%** | Percentage of cases where the ground-truth evidence chunk appeared in the top 5 retrieved results. |
 | **Mean Reciprocal Rank (MRR)** | **0.548** | Measures the ranking quality of the first relevant retrieved citation. |
 ---
