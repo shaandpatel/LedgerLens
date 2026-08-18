@@ -209,5 +209,8 @@ __marimo__/
 # Venv
 ledger-env/
 
+# Data Labeling
+data/labeling/
+
 # Mac
 .DS_Store

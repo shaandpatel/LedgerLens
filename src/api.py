@@ -53,11 +53,13 @@ class InvestigateRequest(BaseModel):
 async def investigate_anomaly(req: InvestigateRequest):
     try:
         ticker = req.trigger.ticker
+        fiscal_year = req.trigger.fiscal_year  # Ensure AnomalyTrigger carries the fiscal year
         cik = sec_client.cik_map.get(ticker)
         if not cik:
             raise ValueError(f"CIK not found for {ticker}")
 
-        html_content = html_parser.fetch_latest_10k_text(ticker, cik)
+        html_content = html_parser.fetch_10k_text_by_year(ticker, cik, fiscal_year)
+        
         mda_text = html_parser.extract_mda_section(html_content)
         chunks = html_parser.chunk_text(mda_text, ticker, "MD&A")
 
