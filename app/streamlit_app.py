@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 st.set_page_config(page_title="LedgerLens", layout="wide")
-st.title("🔎 LedgerLens: Deterministic Analytics & Evidence-Grounded RAG")
+st.title("LedgerLens: Deterministic Analytics & Evidence-Grounded RAG")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -25,7 +25,7 @@ if st.button(f"Run Sector-Aware Screening ({ticker} 2025)"):
     
     if resp:
         trigger = resp[0]
-        st.error(f"🔴 **{trigger['trigger_type']}** | Severity: {trigger['severity']}\n\n{trigger['description']}")
+        st.error(f"**{trigger['trigger_type']}** | Severity: {trigger['severity']}\n\n{trigger['description']}")
         st.write(f"*Dynamic Sub-Queries for RAG:* {trigger['sub_queries']}")
         
         if st.button("Launch Targeted Local RAG Investigation"):

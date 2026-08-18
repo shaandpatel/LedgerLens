@@ -32,8 +32,8 @@ def main():
         
         llm_match = prediction.disclosure_status == case['target_silver_label']
         
-        print(f"Recall@2: {'✅ PASS' if recall_hit else '❌ FAIL'}")
-        print(f"LLM Accuracy (vs Silver Label): {'✅ PASS' if llm_match else '❌ FAIL'} (Predicted: {prediction.disclosure_status})\n")
+        print(f"Recall@2: {'PASS' if recall_hit else 'FAIL'}")
+        print(f"LLM Accuracy (vs Silver Label): {'PASS' if llm_match else 'FAIL'} (Predicted: {prediction.disclosure_status})\n")
 
 if __name__ == "__main__":
     main()
