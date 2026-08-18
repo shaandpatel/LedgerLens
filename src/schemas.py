@@ -26,6 +26,13 @@ class RetrievedEvidence(BaseModel):
 class InvestigationResult(BaseModel):
     ticker: str
     trigger_type: str
+    
+    # --- New Chain-of-Thought Booleans from evaluation_framework.md ---
+    metric_matched: bool = Field(..., description="Does the text explicitly discuss the anomalous metric?")
+    driver_identified: bool = Field(..., description="Does the text name a specific operational cause/driver?")
+    quantified_impact: bool = Field(..., description="Does the text assign a dollar amount or percentage to that driver?")
+    # ------------------------------------------------------------------
+
     disclosure_status: Literal[
         "explicitly_explained",
         "partially_explained",

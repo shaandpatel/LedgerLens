@@ -37,4 +37,4 @@ chunks = [
 ]
 with open("data/corpus/tsla_chunks.json", "w") as f: json.dump(chunks, f)
 
-print("✅ Frozen fixtures generated with Deterministic Silver Labels.")
+print("Frozen fixtures generated with Deterministic Silver Labels.")

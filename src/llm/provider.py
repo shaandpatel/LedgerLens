@@ -15,11 +15,27 @@ class LocalLLMProvider:
             with open(cache_file, "r", encoding="utf-8") as f:
                 return InvestigationResult.model_validate(json.load(f))
                 
-        # Enforce strict schema logic natively via Ollama
+        # Inject the exact framework logic into the system prompt
+        system_prompt = """You are a forensic financial investigator evaluating SEC disclosures. 
+You must strictly follow this Heuristic Matrix to determine the final disclosure_status:
+
+1. Evaluate three boolean facts based ONLY on the provided evidence:
+   - metric_matched: Is the specific anomalous metric discussed?
+   - driver_identified: Is a specific causal driver named?
+   - quantified_impact: Is a dollar amount or percentage attached to that driver?
+
+2. Map those facts to the disclosure_status:
+   - If metric=True, driver=True, quantified=True -> 'explicitly_explained'
+   - If metric=True, driver=True, quantified=False -> 'partially_explained'
+   - If metric=True, driver=False, quantified=False -> 'no_relevant_explanation_found'
+   - If metric=False -> 'no_relevant_explanation_found'
+
+Do not predict fraud or infer intent. Stick strictly to the evidence."""
+
         response = ollama.chat(
             model=self.model,
             messages=[
-                {"role": "system", "content": "You are a financial investigator classifying anomaly disclosures. Do not predict fraud. Classify disclosure completeness based ONLY on the evidence provided."},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
             ],
             format=InvestigationResult.model_json_schema(),
@@ -27,6 +43,6 @@ class LocalLLMProvider:
         )
         
         parsed = InvestigationResult.model_validate_json(response.message.content)
-        with open(cache_file, "w") as f:
+        with open(cache_file, "w", encoding="utf-8") as f:
             f.write(parsed.model_dump_json(indent=2))
         return parsed

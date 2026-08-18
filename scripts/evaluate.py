@@ -9,7 +9,7 @@ def main():
     with open("data/corpus/tsla_chunks.json", "r") as f:
         docs = [DocumentChunk(**c) for c in json.load(f)]
         
-    retriever = DynamicClusterRetrievalPipeline(use_mock=True) # Swap to False to run locally
+    retriever = DynamicClusterRetrievalPipeline(use_mock=False) # Swap to False to run locally
     retriever.index_chunks(docs)
     llm = LocalLLMProvider()
     
