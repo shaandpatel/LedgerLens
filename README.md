@@ -5,6 +5,8 @@
 
 ---
 
+![Frontend](ledgerlens_frontend.png)
+
 ## Core Architecture
 
 * **Anomaly-Driven RAG:** Deterministic financial analytics first identify a company-specific anomaly, which then drives targeted query generation and retrieval from relevant SEC filing sections rather than treating the system as a generic "chat with documents" application.
