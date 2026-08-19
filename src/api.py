@@ -163,7 +163,7 @@ async def investigate_anomalies(req: InvestigateRequest):
 
                 top_chunks = retriever.retrieve_for_anomaly(
                     trigger,
-                    top_k_rerank=3
+                    top_k_rerank=5
                 )
 
                 context_blocks = [
